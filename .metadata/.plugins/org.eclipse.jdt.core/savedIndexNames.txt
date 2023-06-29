@@ -1,5 +1,0 @@
-INDEX VERSION 1.131+C:\Users\xande\eclipse-workspace\FUMEC\.metadata\.plugins\org.eclipse.jdt.core
-1865797976.index
-745960817.index
-2374634735.index
-2525026063.index

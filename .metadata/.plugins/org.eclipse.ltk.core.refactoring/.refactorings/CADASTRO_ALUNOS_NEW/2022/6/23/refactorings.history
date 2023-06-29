@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Copy 2 elements to &apos;ESTACIONAMENTO/src&apos;&#x0D;&#x0A;- Original project: &apos;CADASTRO_ALUNOS_NEW&apos;&#x0D;&#x0A;- Destination element: &apos;ESTACIONAMENTO/src&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     Aluno.java&#x0D;&#x0A;     Main.java" description="Copy compilation units" destination="=ESTACIONAMENTO/src" element1="/src&lt;{Aluno.java" element2="/src&lt;{Main.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1654124795696" units="2" version="1.0"/>
-</session>
