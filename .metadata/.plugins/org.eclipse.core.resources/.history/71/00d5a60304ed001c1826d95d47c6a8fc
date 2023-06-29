@@ -1,0 +1,756 @@
+import java.io.*;
+import java.util.*;
+
+public class Estacionamento {
+
+	char 	ativo;
+	String	codigoEstacionamento;
+	String 	placa;
+	String 	dataOperacao;
+	char 	tipoOperacao;
+	String	modeloCor;
+	String	codigoMarca;
+	String	categoriaMarca;
+	String	horaEntrada;
+	String 	horaSaida;
+	float 	valorPago;
+	
+	
+	public long pesquisarRegistro(String codigoEstacionamentoPesquisa) {	
+		// metodo para localizar um registro no arquivo em disco
+		
+		long posicaoCursorArquivo = 0;
+		try { 
+			RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");
+			while (true) {
+				posicaoCursorArquivo  	= arqEst.getFilePointer();	// posicao do inicio do registro no arquivo
+				ativo		 			= arqEst.readChar();
+				codigoEstacionamento    = arqEst.readUTF();
+				placa   				= arqEst.readUTF();
+				dataOperacao     		= arqEst.readUTF();
+				tipoOperacao 			= arqEst.readChar();
+				modeloCor        		= arqEst.readUTF();
+				codigoMarca   			= arqEst.readUTF();
+				categoriaMarca   		= arqEst.readUTF();
+				horaEntrada   			= arqEst.readUTF();
+				horaSaida   			= arqEst.readUTF();
+				valorPago   			= arqEst.readFloat();
+
+				if ( codigoEstacionamentoPesquisa.equals(codigoEstacionamento) && ativo == 'S') {
+					arqEst.close();
+					return posicaoCursorArquivo;
+				}
+			}
+		}catch (EOFException e) {
+			return -1; // registro nao foi encontrado
+		}catch (IOException e) { 
+			System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+			System.exit(0);
+			return -1;
+		}
+	}
+
+	public void salvarRegistro() {	
+		// metodo para incluir um novo registro no final do arquivo em disco
+		
+		try {
+			RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");	
+			arqEst.seek(arqEst.length());  // posiciona o ponteiro no final do arquivo (EOF)
+			arqEst.writeChar(ativo);
+			arqEst.writeUTF(codigoEstacionamento);
+			arqEst.writeUTF(placa);
+			arqEst.writeUTF(dataOperacao);
+			arqEst.writeChar(tipoOperacao);
+			arqEst.writeUTF(modeloCor);
+			arqEst.writeUTF(codigoMarca);
+			arqEst.writeUTF(categoriaMarca);
+			arqEst.writeUTF(horaEntrada);
+			arqEst.writeUTF(horaSaida);
+			arqEst.writeFloat(valorPago);
+			arqEst.close();
+			System.out.println("Dados gravados com sucesso !\n");
+		}catch (IOException e) { 
+			System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+			System.exit(0);
+		}
+	}
+
+	public void desativarRegistro(long posicao)	{    
+		// metodo para alterar o valor do campo ATIVO para N, tornando assim o registro excluido
+		
+		try {
+			RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");			
+			arqEst.seek(posicao);
+			arqEst.writeChar('N');   // desativar o registro antigo
+			arqEst.close();
+		}catch (IOException e) { 
+			System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+			System.exit(0);
+		}
+	}
+
+	// ***********************  INCLUSAO VEÍCULO  *****************************
+	
+	public void incluirVeiculo() {
+		
+		String codigoEstacionamentoChave = "000000";
+		char confirmacao;
+		long posicaoRegistro;
+		int gerarProximaChave;
+		String MaiorCodigoEstacionamento = "000000";
+		boolean horaValida;
+		boolean dataValida;
+		int marcaValida;
+		boolean categoriaValida;
+
+		System.out.println("\n ***************  INCLUSAO DE REGISTROS  ***************** ");
+		System.out.print("Código para estacionamento: ");
+		
+		try { 
+			RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");
+			while (true) {
+				ativo		 			= arqEst.readChar();
+				codigoEstacionamento    = arqEst.readUTF();
+				placa   				= arqEst.readUTF();
+				dataOperacao     		= arqEst.readUTF();
+				tipoOperacao 			= arqEst.readChar();
+				modeloCor        		= arqEst.readUTF();
+				codigoMarca   			= arqEst.readUTF();
+				categoriaMarca   		= arqEst.readUTF();
+				horaEntrada   			= arqEst.readUTF();
+				horaSaida   			= arqEst.readUTF();
+				valorPago   			= arqEst.readFloat();
+
+				if ( Integer.parseInt(codigoEstacionamento) > Integer.parseInt(MaiorCodigoEstacionamento) && ativo == 'S') {
+					MaiorCodigoEstacionamento = codigoEstacionamento;
+					arqEst.close();
+				}
+			}
+		}catch (EOFException e) 
+		{
+			gerarProximaChave = Integer.parseInt(codigoEstacionamentoChave) + 1;
+			codigoEstacionamentoChave = String.valueOf(gerarProximaChave);
+			
+			while ( codigoEstacionamentoChave.length() < 6 )
+			{
+				codigoEstacionamentoChave = "0" + codigoEstacionamentoChave;
+			}
+			System.out.println(codigoEstacionamentoChave);
+		}
+			catch (IOException e) 
+			{ 
+				System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+				System.exit(0);
+			}
+
+		ativo = 'S';
+		codigoEstacionamento = codigoEstacionamentoChave;
+		horaSaida = "";
+		valorPago = 0;
+		tipoOperacao = 'E';
+		
+		do {
+			System.out.print("Digite o código da marca do veículo ......................: ");
+			codigoMarca = Main.leia.nextLine();
+			
+			marcaValida = pesquisarMarcaVeiculo(codigoMarca);
+			
+			if ( marcaValida == -1 )
+			{
+				System.out.println("A marca não existe, tente novamente!\n");
+			}
+		} while ( marcaValida == -1 );
+		
+		do {
+			System.out.println("Digite a categoria do veículo ..........................: ");
+			categoriaMarca = Main.leia.nextLine();
+			
+			categoriaValida = consistirCategoria(categoriaMarca);
+			
+			if ( ! categoriaValida )
+			{
+				System.out.println("ERRO! Categoria não é valida, tente novamente!\n");
+			}
+		} while ( ! categoriaValida );
+		
+		System.out.print("Digite a placa do veículo (XXX9999) ..........................: ");
+		placa = Main.leia.nextLine();
+		
+		do {
+			System.out.println("Digite o modelo e a cor do veículo .....................: ");
+			modeloCor = Main.leia.nextLine();
+			
+			if ( modeloCor.length() < 10 )
+			{
+				System.out.println("Devem existir pelo menos 10 caracteres!\n");
+			}
+		} while ( modeloCor.length() < 10 );
+		
+		do {
+			System.out.print("Digite a data de hoje (DD/MM/AAAA)........................: ");
+			dataOperacao= Main.leia.nextLine();
+			
+			dataValida = validarDataOperacao(dataOperacao);
+			
+			if ( ! dataValida ) 
+			{
+				System.out.println("Digite a data no formato DD/MM/AAAA!\n");
+			}
+		} while ( ! dataValida );
+		
+		do {
+			System.out.print("Digite a hora da entrada (HH:MM)..........................: ");
+			horaEntrada = Main.leia.next();
+			
+			horaValida = validarHorarios(horaEntrada);
+			
+			if ( ! horaValida ) 
+			{
+				System.out.println("Digite a hora no formato HH:MM!\n");
+			}
+		} while ( ! horaValida );	  
+
+		do {
+			System.out.print("\nConfirma a gravacao dos dados (S/N) ? ");
+			confirmacao = Main.leia.next().charAt(0);
+			if (confirmacao == 'S') {
+				salvarRegistro();
+			}
+		}while (confirmacao != 'S' && confirmacao != 'N');		    
+	}
+	
+	public static int pesquisarMarcaVeiculo (String codigoMarca) {
+		
+		int x;
+		
+		for ( x = 0 ; x < 10 ; x++ ) 
+		{
+			if (codigoMarca.equals(Main.codigoMarca[x])) 
+			{
+				return x;
+			}
+		}
+		return -1;
+	}
+	
+	public static boolean consistirCategoria (String categoriaMarca) {
+			
+			boolean valido;
+			valido = false;
+			
+			if (categoriaMarca.equals("GI")) 
+			{			
+				System.out.println("Grande e Importado");
+				valido = true;
+			}
+			else if (categoriaMarca.equals("PI")) 
+			{
+				System.out.println("Pequeno e Importado");
+				valido = true;
+			}
+			else if (categoriaMarca.equals("GN")) 
+			{
+				System.out.println("Grande e Nacional");
+				valido = true;
+			}
+			else if (categoriaMarca.equals("PN")) 
+			{
+				System.out.println("Pequeno e Nacional");
+				valido = true;
+			}
+			return valido;
+		}
+	
+	public static boolean validarDataOperacao ( String dataOperacao ) {
+			
+			boolean dataValida;
+			int dia, mes, ano;
+			
+			dataValida = true;
+			dia = Integer.parseInt(dataOperacao.substring( 0 , 2 ));
+			mes = Integer.parseInt(dataOperacao.substring( 3 , 5 ));
+			ano = Integer.parseInt(dataOperacao.substring( 6 ));
+			
+			if ( dataOperacao.length() != 10 )
+			{
+				dataValida = false;
+				return dataValida;
+			} 
+			else if ( dataOperacao.substring( 2 , 3 ).compareTo("/") != 0 || dataOperacao.substring( 5 , 6 ).compareTo("/") != 0 )
+			{
+				dataValida = false;
+				return dataValida;
+			}
+			else if ( mes >= 1 && mes <= 12 && ano <= 2022 )
+			{
+				if ( mes == 2 )
+				{
+					if ( ano % 4 == 0 && ano % 100 != 0 || ano % 400 == 0 )
+					{
+						if ( dia < 1 || dia > 29 )
+						{
+							dataValida = false;
+							return dataValida;
+						}
+					}
+					else
+					{
+						if ( dia < 1 || dia > 28 )
+						{
+							dataValida = false;
+							return dataValida;
+						}
+					}
+				}
+				if ( mes == 4 || mes == 6 || mes == 9 || mes == 11 )
+				{
+					if ( dia < 1 || dia > 30 )
+					{
+						dataValida = false;
+						return dataValida;
+					}
+				}
+				else
+				{
+					if ( dia < 1 || dia > 31 )
+					{
+						dataValida = false;
+						return dataValida;
+					}
+				}
+			}
+			return dataValida;
+	}
+	
+	public static boolean validarHorarios ( String parametroHora ) {
+		
+		int hora, minuto;
+		boolean horarioValido;
+		
+		horarioValido = false;
+		try {
+			hora = Integer.parseInt( parametroHora.substring( 0 , 2 ));
+			minuto = Integer.parseInt( parametroHora.substring( 3 ));
+			
+			if (( hora >= 0 && hora <= 23 ) && ( minuto >= 0  && minuto <= 59 )) 
+			{
+				horarioValido = true;
+			} 
+			else {
+				System.out.println("Hora digitada inválida!\n");
+			}
+		} catch ( NumberFormatException E ) 
+		{
+			System.out.println("\nO texto digitado não pode ser convertido em número!");
+		}
+		return horarioValido;
+	}
+	
+	//************************  SAÍDA VEÍCULO  *****************************
+	
+	public void saidaVeiculo() {
+		String codigoEST;
+		char confirmacao;
+		long posicaoRegistro = 0;
+		int horaE, horaS;
+		int minutoE, minutoS;
+		
+		do {
+			System.out.println("\n ***************  SAÍDA DE VEÍCULOS  ***************** ");
+			System.out.println("Digite o código do veículo estacionado que está saindo: ");
+			codigoEST = Main.leia.next();
+			
+			try { 
+				RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");
+				while (true) {
+					// guarda a posição inicial do registro a ser alterado
+					posicaoRegistro = arqEst.getFilePointer();
+					ativo		 			= arqEst.readChar();
+					codigoEstacionamento    = arqEst.readUTF();
+					placa   				= arqEst.readUTF();
+					dataOperacao     		= arqEst.readUTF();
+					tipoOperacao 			= arqEst.readChar();
+					modeloCor        		= arqEst.readUTF();
+					codigoMarca   			= arqEst.readUTF();
+					categoriaMarca   		= arqEst.readUTF();
+					horaEntrada   			= arqEst.readUTF();
+					horaSaida   			= arqEst.readUTF();
+					valorPago   			= arqEst.readFloat();
+
+					if ( codigoEstacionamento.equals(codigoEST) && ativo == 'S' ) 
+					{
+						System.out.println("Digite a hora de saída do veículo (HH:MM): ");
+						horaSaida = Main.leia.next();
+						arqEst.close();
+					}
+				}
+			}catch (EOFException e) 
+			{
+				System.out.println("Código digitado não registrado ainda!\n");
+			}
+			catch (IOException e) 
+			{ 
+				System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+				System.exit(0);
+			}
+			
+			horaE = Integer.parseInt( horaEntrada.substring( 0 , 2 ));
+			horaS = Integer.parseInt( horaSaida.substring( 0 , 2 ));
+			minutoE = Integer.parseInt( horaEntrada.substring( 3 ));
+			minutoS = Integer.parseInt( horaSaida.substring( 3 ));
+			
+			if ( horaS < horaE || ( horaS == horaE && minutoS <= minutoE ) )
+			{
+				System.out.println("A hora de saída deve ser maior que a hora de entrada!\n");
+			}
+		} while ( horaS < horaE || ( horaS == horaE && minutoS <= minutoE ) );
+		
+		valorPago = calcularValorA_Pagar(horaEntrada, horaSaida, categoriaMarca);
+		
+		do {
+			System.out.print("\nConfirma a gravacao dos dados (S/N) ? ");
+			confirmacao = Main.leia.next().charAt(0);
+			if (confirmacao == 'S') 
+			{
+				desativarRegistro(posicaoRegistro);
+				salvarRegistro();
+			}
+		}while (confirmacao != 'S' && confirmacao != 'N');
+	}
+	
+	public static float calcularValorA_Pagar( String horaEntrada , String horaSaida , String categoriaVeiculo ) {
+		int horaE, horaS;
+		int minutoE, minutoS;
+		float valorHora;
+		float valorPago;
+		
+		horaE = Integer.parseInt( horaEntrada.substring( 0 , 2 ));
+		horaS = Integer.parseInt( horaSaida.substring( 0 , 2 ));
+		minutoE = Integer.parseInt( horaEntrada.substring( 3 ));
+		minutoS = Integer.parseInt( horaSaida.substring( 3 ));
+		
+		if ( horaE <= 18 && minutoE <= 00 || horaE <= 17 && minutoE <= 59 )
+		{
+			if ( categoriaVeiculo.equals("GI") )
+			{
+				valorHora = 10;
+			}
+			else if ( categoriaVeiculo.equals("PI") )
+			{
+				valorHora = (float) 8.2;
+			}
+			else if ( categoriaVeiculo.equals("GN") )
+			{
+				valorHora = 9;
+			}
+			else {
+				valorHora = 7;
+			}
+		}
+		else {
+			if ( categoriaVeiculo.equals("GI") )
+			{
+				valorHora = 8;
+			}
+			else if ( categoriaVeiculo.equals("PI") )
+			{
+				valorHora = (float) 6.5;
+			}
+			else if ( categoriaVeiculo.equals("GN") )
+			{
+				valorHora = (float) 7.5;
+			}
+			else {
+				valorHora = 6;
+			}
+		}
+		valorPago = ( horaS - horaE + ( minutoS - minutoE ) / 60 ) * valorHora;
+		
+		return valorPago;
+	}
+	
+	//************************  ALTERAÇÃO  *****************************
+	
+	public void alterar() {
+		
+		String matriculaChave;
+		char confirmacao;
+		long posicaoRegistro = 0;
+		byte opcao;
+
+		do {
+			do {
+				Main.leia.nextLine();
+				System.out.println("\n ***************  ALTERACAO DE ALUNOS  ***************** ");
+				System.out.print("Digite a Matricula do Aluno que deseja alterar( FIM para encerrar ): ");
+				matriculaChave = Main.leia.nextLine();
+				if (matriculaChave.equals("FIM")) {
+					break;
+				}
+
+				posicaoRegistro = pesquisarAluno(matriculaChave);
+				if (posicaoRegistro == -1) {
+					System.out.println("Matricula nao cadastrada no arquivo, digite outro valor\n");
+				}
+			}while (posicaoRegistro == -1);
+
+			if (matriculaChave.equals("FIM")) {
+				break;
+			}
+
+			ativo = 'S';
+
+			do {
+				System.out.println("[ 1 ] Nome do Aluno............: " + nomeAluno);
+				System.out.println("[ 2 ] Data de nascimento ......: " + dtNasc);
+				System.out.println("[ 3 ] Valor da mensalidade.....: " + mensalidade);
+				System.out.println("[ 4 ] sexo do Aluno............: " + sexo);
+
+				do{
+					System.out.println("Digite o numero do campo que deseja alterar (0 para finalizar as alteraÃ§Ãµes): ");
+					opcao = Main.leia.nextByte();
+				}while (opcao < 0 || opcao > 4);
+
+				switch (opcao) {
+				case 1:
+					Main.leia.nextLine();
+					System.out.print  ("Digite o NOVO NOME do Aluno..................: ");
+					nomeAluno = Main.leia.nextLine();
+					break;
+				case 2: 
+					Main.leia.nextLine();
+					System.out.print  ("Digite a NOVA DATA de Nascimento (DD/MM/AAAA): ");
+					dtNasc = Main.leia.nextLine();
+					break;
+				case 3:
+					System.out.print  ("Digite o NOVO VALOR da mensalidade...........: ");
+					mensalidade = Main.leia.nextFloat();
+					break;
+				case 4: 
+					System.out.print  ("Digite o NOVO sexo do Aluno (M/F)............: ");
+					sexo = Main.leia.next().charAt(0);
+					break;
+				}
+				System.out.println();
+			}while (opcao != 0);  		
+
+			do {
+				System.out.print("\nConfirma a alteracao dos dados (S/N) ? ");
+				confirmacao = Main.leia.next().charAt(0);
+				if (confirmacao == 'S') {
+					desativarAluno(posicaoRegistro);
+					salvarAluno();
+					System.out.println("Dados gravados com sucesso !\n");
+				}
+			}while (confirmacao != 'S' && confirmacao != 'N');
+
+		}while ( ! matricula.equals("FIM"));
+	}
+
+
+	//************************  EXCLUSAO  *****************************
+	
+	public void excluir() {
+		String matriculaChave;
+		char confirmacao;
+		long posicaoRegistro = 0;
+
+		do {
+			do {
+				Main.leia.nextLine();
+				System.out.println(" ***************  EXCLUSAO DE ALUNOS  ***************** ");
+				System.out.print("Digite a Matricula do Aluno que deseja excluir ( FIM para encerrar ): ");
+				matriculaChave = Main.leia.nextLine();
+				if (matriculaChave.equals("FIM")) {
+					break;
+				}
+
+				posicaoRegistro = pesquisarAluno(matriculaChave);
+				if (posicaoRegistro == -1) {
+					System.out.println("Matricula nao cadastrada no arquivo, digite outro valor\n");
+				}
+			}while (posicaoRegistro == -1);
+
+			if (matriculaChave.equals("FIM")) {
+				System.out.println("\n ************  PROGRAMA ENCERRADO  ************** \n");
+				break;
+			}
+
+			System.out.println("Nome do aluno.......: " + nomeAluno);
+			System.out.println("Data de nascimento..: " + dtNasc);
+			System.out.println("Valor da mensalidade: " + mensalidade);
+			System.out.println("Sexo do aluno.......: " + sexo);
+			System.out.println();
+
+			do {
+				System.out.print("\nConfirma a exclusao deste aluno (S/N) ? ");
+				confirmacao = Main.leia.next().charAt(0);
+				if (confirmacao == 'S') {
+					desativarAluno(posicaoRegistro);
+				}
+			}while (confirmacao != 'S' && confirmacao != 'N');
+
+		}while ( ! matricula.equals("FIM"));
+	}
+
+	//************************  CONSULTA  *****************************
+	
+	public void consultar() 	{
+		RandomAccessFile arqEst;
+		byte opcao;
+		String matriculaChave;
+		char sexoAux;
+		long posicaoRegistro;
+
+		do {
+			do {
+				System.out.println(" ***************  CONSULTA DE ALUNOS  ***************** ");
+				System.out.println(" [1] EXIBIR TODOS OS VEÍCULOS ");
+				System.out.println(" [2] EXIBIR SOMENTE OS VEÍCULOS QUE NÃO SAÍRAM DO ESTACIONAMENTO ");
+				System.out.println(" [3] EXIBIR OS REGISTROS DE UMA DATA ESPECÍFICA ");
+				System.out.println(" [0] SAIR");
+				System.out.print("\nDigite a opção desejada: ");
+				opcao = Main.leia.nextByte();
+				
+				if (opcao < 0 || opcao > 3) {
+					System.out.println("opcao Invalida, digite novamente.\n");
+				}
+			}while (opcao < 0 || opcao > 3);
+
+			switch (opcao) {
+			
+			case 0:
+				System.out.println("\n ************  PROGRAMA ENCERRADO  ************** \n");
+				break;
+
+			case 1:  // EXIBIR TODOS OS REGISTROS
+				Main.leia.nextLine();  // limpa buffer de memoria
+				
+				try { 
+					RandomAccessFile arqEst = new RandomAccessFile("EST.DAT", "rw");
+					while (true) {
+						ativo		 			= arqEst.readChar();
+						codigoEstacionamento    = arqEst.readUTF();
+						placa   				= arqEst.readUTF();
+						dataOperacao     		= arqEst.readUTF();
+						tipoOperacao 			= arqEst.readChar();
+						modeloCor        		= arqEst.readUTF();
+						codigoMarca   			= arqEst.readUTF();
+						categoriaMarca   		= arqEst.readUTF();
+						horaEntrada   			= arqEst.readUTF();
+						horaSaida   			= arqEst.readUTF();
+						valorPago   			= arqEst.readFloat();
+
+						if ( ativo == 'S' ) 
+						{
+							impri
+						}
+					}
+					arqEst.close();
+				}catch (EOFException e) 
+				{
+					System.out.println("Código digitado não registrado ainda!\n");
+				}
+				catch (IOException e) 
+				{ 
+					System.out.println("Erro na abertura do arquivo  -  programa sera finalizado");
+					System.exit(0);
+				}
+				
+				break;
+
+			case 2:  // imprime todos os alunos
+				try { 
+					arqEst = new RandomAccessFile("EST.DAT" , "rw");
+					imprimirCabecalho();
+					while (true) {
+						ativo		= arqEst.readChar();
+						matricula   = arqEst.readUTF();
+						nomeAluno   = arqEst.readUTF();
+						dtNasc      = arqEst.readUTF();
+						mensalidade = arqEst.readFloat();
+						sexo        = arqEst.readChar();
+						if ( ativo == 'S') {
+							imprimirAluno();
+						}
+					}
+					//    arqEst.close();
+				} catch (EOFException e) {
+					System.out.println("\n FIM DE RELATORIO - ENTER para continuar...\n");
+					Main.leia.nextLine();
+					matriculaChave = Main.leia.nextLine();
+				} catch (IOException e) { 
+					System.out.println("Erro na abertura do arquivo - programa sera finalizado");
+					System.exit(0);
+				}
+				break;
+
+			case 3:  // imprime alunos do sexo desejado
+				do {
+					System.out.print("Digite o Sexo desejado (M/F): ");
+					sexoAux = Main.leia.next().charAt(0);
+					if (sexoAux != 'F' && sexoAux != 'M') {
+						System.out.println("Sexo Invalido, digite M ou F");
+					}
+				}while (sexoAux != 'F' && sexoAux != 'M');
+
+				try { 
+					arqEst = new RandomAccessFile("EST.DAT", "rw");
+					imprimirCabecalho();
+					while (true) {
+						ativo		= arqEst.readChar();
+						matricula   = arqEst.readUTF();
+						nomeAluno   = arqEst.readUTF();
+						dtNasc      = arqEst.readUTF();
+						mensalidade = arqEst.readFloat();
+						sexo        = arqEst.readChar();
+
+						if ( sexoAux == sexo && ativo == 'S') {
+							imprimirAluno();
+						}
+					}
+				} catch (EOFException e) {
+					System.out.println("\n FIM DE RELATORIO - ENTER para continuar...\n");
+					Main.leia.nextLine();
+					matriculaChave = Main.leia.nextLine();
+				} catch (IOException e) { 
+					System.out.println("Erro na abertura do arquivo - programa sera finalizado");
+					System.exit(0);
+				}
+
+			}	
+
+		} while ( opcao != 0 );
+	}
+
+	public void imprimirCabecalho () {
+		System.out.println("-- PLACA --  -OPERAÇÃO-  --- MODELO E COR ---  --MARCA--  -CATEGORIA-"
+				+ "  --DATA--  -HORA ENTRADA-  -HORA SAÍDA-  -VALOR PAGO- ");
+	}
+
+	public void imprimirRegistro () {
+		System.out.println(	
+				formatarString( placa, 7 ) + "  " +
+				formatarString( Character.toString(tipoOperacao), 10) + "  " + 
+				formatarString( modeloCor , 20) + "  " + 
+				formatarString( codigoMarca , 14 ) + "  " +
+				formatarString( categoriaMarca , 12 ) + "  " +
+				formatarString( dataOperacao, 10 ) + "  " +
+				formatarString( horaEntrada, 14 ) + "  " +
+				formatarString( horaSaida, 14 ) + "  " +
+				formatarString( String.valueOf(valorPago), 12 )
+				); 
+	}
+
+	public static String formatarString (String texto, int tamanho) {	
+		// retorna uma string com o numero de caracteres passado como parametro em TAMANHO
+		if (texto.length() > tamanho) {
+			texto = texto.substring(0,tamanho);
+		}else{
+			while (texto.length() < tamanho) {
+				texto = texto + " ";
+			}
+		}
+		return texto;
+	}
+}

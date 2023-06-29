@@ -1,0 +1,14 @@
+
+u
+java:S1192B"FDefine a constant instead of duplicating this literal "PEDRA" 5 times.(”≤Í∏H©RCRITICALZ
+CODE_SMELL
+ä	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(ÙÍ–ù˚ˇˇˇˇHØRMINORZ
+CODE_SMELL
+u
+java:S1192B"FDefine a constant instead of duplicating this literal "PAPEL" 5 times.(”≤Í∏H∞RCRITICALZ
+CODE_SMELL
+w
+java:S1192B"HDefine a constant instead of duplicating this literal "TESOURA" 5 times.(”≤Í∏H∂RCRITICALZ
+CODE_SMELL
+x	java:S101/"MRename this class name to match the regular expression '^[A-Z][a-zA-Z0-9]*$'.(óË˙ïHºRMINORZ
+CODE_SMELL

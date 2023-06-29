@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;codigoMinimo&apos; in &apos;LTP2_Lista_2.Questão_3.main(...)&apos; to &apos;numeroPecasMinimo&apos;&#x0D;&#x0A;- Original project: &apos;FUMEC&apos;&#x0D;&#x0A;- Original element: &apos;LTP2_Lista_2.Questão_3.main(String[]).codigoMinimo&apos;&#x0D;&#x0A;- Renamed element: &apos;codigoMinimo&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;codigoMinimo&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;LTP2_Lista_2{Questão_3.java[Questão_3~main~\[QString;@codigoMinimo!1828!1857!1832!1843!I!0!false" name="numeroPecasMinimo" references="true" stamp="1646254983250" version="1.0"/>
+</session>

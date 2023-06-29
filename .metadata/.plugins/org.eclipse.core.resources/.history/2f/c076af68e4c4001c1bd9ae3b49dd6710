@@ -1,0 +1,99 @@
+package LTP2_Lista_6;
+
+import java.util.*;
+
+/*
+Exercício 5.2 – Fazer um programa em Java para receber via teclado um código caracter contendo 11
+dígitos. Os 9 primeiros dígitos representam o código em si e os 2 últimos os dígitos representam os
+dígitos verificadores. Utilizando a regra de cálculo dos dígitos verificadores, o programa deverá conter
+um método para calcular os dois dígitos verificadores do código e comparar com os 2 dígitos
+verificadores digitados no código. Se forem iguais, o programa deverá imprimir a mensagem: “Dígito
+Correto”, caso contrário imprimir “Dígito Inválido”.
+
+O cálculo dos dois dígitos verificadores deverá ser feito baseando-se nos 9 primeiros dígitos do Código:
+1º. Dígito verificador:
+1 - somar entre si o valor de cada dígito do código
+2 - dividir o resultado por 10
+3 - o 1º. Dígito será a parte inteira do resultado da divisão do item 2 (acima).
+
+2º. Dígito verificador:
+1 - multiplicar entre si o valor de cada dígito do código
+2 - o 2º. Digito verificador será o ultimo algarismo a direita do resultado da multiplicação
+do item 1 (acima).
+
+Exemplo:
+9 primeiros dígitos do Código: "821324312"
+1º. Digito verificador: 8+2+1+3+2+4+3+1+2 = 26 / 10 = 2,6 => Parte inteira = 2
+2º. Digito verificador: 8*2*1*3*2*4*3*1*2 = 2304 => Ultimo algarismo a direita = 4
+
+OBS: - consistir a entrada de dados para aceitar somente CODIGO:
+- com 11 caracteres
+- todos os 11 caracteres devem ser dígitos
+*/
+
+public class Exercício_5_2 {
+
+	public static void main(String[] args) {
+		
+		Scanner leia = new Scanner(System.in);
+		
+		String codigo;
+		int tamanhoString;
+		int stringInvalida;
+		
+		do {
+			System.out.println("Digite o CPF (só os números): ");
+			codigo = leia.next();
+			tamanhoString = codigo.length();
+			stringInvalida = 0;
+			
+			for ( int i = 0 ; i < 11 ; i++ ) {
+				if ( Integer.parseInt( codigo.substring( i , i + 1 ) ) < '0' || Integer.parseInt( codigo.substring( i , i + 1 ) ) > '9' ) {
+					stringInvalida = 1;
+					break;
+				}
+			}
+			
+			if ( tamanhoString != 11 || stringInvalida != 1 ) {
+				System.out.println("\nO CPF digitado é inválido.\n");
+			}
+		} while ( tamanhoString != 11 || stringInvalida != 1 );
+		
+		calcularDigitosVerificadoresE_CompararComOsDigitados(codigo);
+	}
+	
+	public static void calcularDigitosVerificadoresE_CompararComOsDigitados ( String codigo ) {
+		
+		int digito1, digito2;
+		int tamanhoString;
+		String digito2STR;
+		int vetDigitos[] = new int[9];
+		int somaDigitos = 0, multiplicacaoDigitos = 1;
+		
+		for ( int i = 0 ; i < 9 ; i++ ) {
+			try {	
+				vetDigitos[i] = Integer.parseInt(codigo.substring( i , i + 1 ));
+				somaDigitos = somaDigitos + vetDigitos[i];
+				multiplicacaoDigitos = multiplicacaoDigitos * vetDigitos[i];
+				
+			} catch ( NumberFormatException E ) {
+				System.out.println("\nO texto digitado não pode ser convertido em número!");
+			}
+		}
+		try {
+			digito1 = (int) (somaDigitos / 10);
+			
+			digito2STR = String.valueOf( multiplicacaoDigitos );
+			tamanhoString = digito2STR.length();
+			digito2 = Integer.parseInt( digito2STR.substring( tamanhoString - 1 ) );
+			
+			if ( Integer.parseInt( codigo.substring( 9 , 10 ) ) == digito1 && Integer.parseInt( codigo.substring( 10 , 11 ) ) == digito2 ) {
+				System.out.println("\nDígito correto!\n");
+			} else {
+				System.out.println("\nDígito inválido!\n");
+			}
+		} catch ( NumberFormatException E ) {
+			System.out.println("\nO texto digitado não pode ser convertido em número!");
+		}
+	}
+}
